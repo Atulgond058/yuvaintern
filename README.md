@@ -8,6 +8,8 @@ real endpoints later requires no component changes.
 
 ---
 
+# Live Link -- https://medisynchealth.netlify.app/
+
 ## 1. Development Process
 
 The build followed the sequence below, matching the task's key steps:
