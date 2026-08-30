@@ -1,0 +1,196 @@
+/* ==========================================================================
+   MediSync Design Tokens
+   A calm, clinical-but-human system: cool paper background, deep slate ink,
+   a single clinical-teal accent, and the existing triage palette (red/amber/
+   green) reused everywhere urgency needs to be legible at a glance.
+   ========================================================================== */
+
+:root {
+  /* --- Color: surface & ink --- */
+  --color-bg: #F5F8FA;
+  --color-bg-raised: #FFFFFF;
+  --color-bg-sunken: #EEF2F5;
+  --color-ink: #14293B;
+  --color-text: #3C4C5C;
+  --color-muted: #7C8CA0;
+  --color-border: #DFE6EC;
+  --color-border-strong: #C7D2DB;
+
+  /* --- Color: accent (clinical teal) --- */
+  --color-accent: #1F6F6B;
+  --color-accent-dark: #144F4C;
+  --color-accent-soft: #E3F1EF;
+  --color-accent-contrast: #FFFFFF;
+
+  /* --- Color: triage / status system (shared with the report) --- */
+  --color-emergency: #B0332E;
+  --color-emergency-soft: #FBEAE9;
+  --color-urgent: #C98A2C;
+  --color-urgent-soft: #FBF2E2;
+  --color-routine: #3E8A5C;
+  --color-routine-soft: #E8F3EC;
+  --color-info: #2E5C8A;
+  --color-info-soft: #E9F0F8;
+
+  /* --- Typography --- */
+  --font-display: "Fraunces", "Iowan Old Style", Georgia, serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", "SFMono-Regular", Menlo, monospace;
+
+  --fs-hero: clamp(2.4rem, 4.4vw, 4rem);
+  --fs-h1: clamp(1.9rem, 3vw, 2.6rem);
+  --fs-h2: clamp(1.4rem, 2vw, 1.8rem);
+  --fs-h3: 1.15rem;
+  --fs-body: 1rem;
+  --fs-small: 0.875rem;
+  --fs-xs: 0.75rem;
+
+  /* --- Spacing scale --- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-9: 96px;
+
+  /* --- Shape & elevation --- */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-pill: 999px;
+  --shadow-sm: 0 1px 2px rgba(20, 41, 59, 0.06), 0 1px 1px rgba(20, 41, 59, 0.04);
+  --shadow-md: 0 8px 24px rgba(20, 41, 59, 0.08), 0 2px 6px rgba(20, 41, 59, 0.05);
+  --shadow-lg: 0 20px 48px rgba(20, 41, 59, 0.14);
+
+  --content-max: 1180px;
+  --transition: 180ms ease;
+}
+
+/* Respect reduced motion globally */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  color: var(--color-ink);
+  margin: 0 0 var(--space-3);
+  line-height: 1.15;
+  font-weight: 600;
+}
+
+p { margin: 0 0 var(--space-4); }
+
+a { color: inherit; text-decoration: none; }
+
+img { max-width: 100%; display: block; }
+
+button { font-family: inherit; }
+
+ul { list-style: none; margin: 0; padding: 0; }
+
+/* Visible keyboard focus everywhere — never suppressed */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2.5px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.container {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: -999px;
+  top: auto;
+  background: var(--color-ink);
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 0 0 8px 0;
+  z-index: 1000;
+}
+.skip-link:focus {
+  left: 0;
+  top: 0;
+}
+
+/* --- Pulse-line signature: a heartbeat rule used as a divider --- */
+.pulse-divider {
+  width: 100%;
+  height: 28px;
+  display: block;
+  color: var(--color-border-strong);
+}
+.pulse-divider path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Reusable status badge, colors applied via data-level */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.badge::before {
+  content: "";
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+.badge[data-level="emergency"] { background: var(--color-emergency-soft); color: var(--color-emergency); }
+.badge[data-level="urgent"] { background: var(--color-urgent-soft); color: var(--color-urgent); }
+.badge[data-level="routine"] { background: var(--color-routine-soft); color: var(--color-routine); }
+.badge[data-level="info"] { background: var(--color-info-soft); color: var(--color-info); }
