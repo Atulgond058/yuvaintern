@@ -1,4 +1,4 @@
-# MediSync — Front-End Application (Week 2)
+# MediSync — Front-End Application
 
 A responsive, accessible front-end for MediSync's patient experience, built with **React 18**,
 **React Router 6**, and **Vite**. Three interconnected views — a marketing landing page, a
@@ -127,7 +127,9 @@ npm run preview    # serves the production build locally for a final check
 ## 7. Project Structure
 
 ```
-medisync-frontend/
+yuvaintern/
+└── public/
+     ├── _redirects
 ├── index.html
 ├── package.json
 ├── vite.config.js
@@ -165,8 +167,6 @@ automated headless browser, covering:
 - Empty states (no search results, no prescriptions, no documents)
 - Mobile sidebar open/close via the hamburger toggle
 - Keyboard-only navigation (visible focus outlines on every interactive element)
-
-## 9. Known Limitations / Next Steps
 
 - Data is static (`mockData.js`); no network requests are made yet. The data-access functions
   are isolated so they can be swapped for real API calls without touching components.
