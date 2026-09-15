@@ -1,3 +1,6 @@
+import { useEffect } from "react";
+import { useState, useEffect } from "react";
+import { api } from "../api/client.js";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import AppShell from "../components/AppShell.jsx";
@@ -9,6 +12,12 @@ import { appointments, symptomLogs, getDoctorById, currentUser } from "../data/m
 import "./Dashboard.css";
 
 export default function Dashboard() {
+  useEffect(() => {
+    api.listDoctors()
+      .then((data) => console.log("✅ Backend connected! Doctors:", data.doctors))
+      .catch((err) => console.error("❌ Backend connection failed:", err.message));
+  }, []);
+  
   const [query, setQuery] = useState("");
 
   const upcoming = useMemo(
