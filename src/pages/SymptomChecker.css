@@ -1,0 +1,30 @@
+.breadcrumb-link { color: var(--color-accent-dark); font-weight: 600; }
+
+.symptom-checker { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); align-items: start; max-width: 900px; }
+
+.symptom-checker__form-card, .symptom-checker__result {
+  background: var(--color-bg-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+}
+
+.symptom-checker__intro { color: var(--color-text); margin-bottom: var(--space-5); }
+
+.symptom-checker__result-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-4); }
+.symptom-checker__result-header h2 { font-size: 1.1rem; margin: 0; }
+
+.symptom-checker__reasons { display: flex; flex-direction: column; gap: var(--space-2); margin-bottom: var(--space-5); }
+.symptom-checker__reasons li {
+  background: var(--color-bg-sunken);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--fs-small);
+  color: var(--color-text);
+}
+
+.symptom-checker__actions { display: flex; gap: var(--space-3); flex-wrap: wrap; }
+
+@media (max-width: 800px) {
+  .symptom-checker { grid-template-columns: 1fr; }
+}

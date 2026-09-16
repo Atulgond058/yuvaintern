@@ -1,0 +1,32 @@
+.book-appt {
+  max-width: 560px;
+  background: var(--color-bg-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+}
+
+.book-appt__slots {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: var(--space-2);
+}
+
+.book-appt__slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: var(--space-3);
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-raised);
+  font-family: inherit;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  color: var(--color-ink);
+  cursor: pointer;
+}
+.book-appt__slot span:last-child { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--color-muted); font-weight: 500; }
+.book-appt__slot:hover { border-color: var(--color-accent); }
+.book-appt__slot--active { background: var(--color-accent-soft); border-color: var(--color-accent); }

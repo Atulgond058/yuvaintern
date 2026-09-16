@@ -1,178 +1,153 @@
-# MediSync — Front-End Application
+# MediSync — Front-End Application (Backend-Integrated)
 
-A responsive, accessible front-end for MediSync's patient experience, built with **React 18**,
-**React Router 6**, and **Vite**. Three interconnected views — a marketing landing page, a
-patient dashboard, and an appointment detail page — share one design system and a mock data
-layer that mirrors the REST API described in the Week 1 architecture report, so swapping in
-real endpoints later requires no component changes.
+A responsive, accessible front-end for MediSync, built with **React 18**, **React Router 6**,
+and **Vite** — now fully connected to the real MediSync back-end API (Week 3) instead of mock
+data. Authentication, appointments, symptom triage, prescriptions, and records are all live.
 
 ---
 
-# Live Link -- https://medisynchealth.netlify.app/
+## 1. What Changed From the Mock-Data Version
 
-## 1. Development Process
+The Week 2 version used a static `mockData.js` file behind a stable data-access seam. This pass
+replaces that seam with real HTTP calls to the backend, with **no change to the visual design
+system or component styling** — only data-fetching and auth were added.
 
-The build followed the sequence below, matching the task's key steps:
+New/changed pieces:
 
-1. **Environment setup** — scaffolded a minimal Vite + React project by hand (`package.json`,
-   `vite.config.js`, `index.html`) rather than a CLI wizard, to keep the dependency tree small
-   (`react`, `react-dom`, `react-router-dom` only, plus Vite's React plugin as a dev dependency).
-2. **Design planning (wireframe pass, in the design token layer)** — before any component code,
-   a token system was written in `src/styles/tokens.css`: a color palette, a three-typeface
-   pairing, a spacing/radius scale, and one signature visual motif (see Section 2). Layout
-   concepts for all three pages were reasoned through as a hero-split, a sidebar-shell, and a
-   two-column detail-plus-sidebar layout before implementation.
-3. **Component implementation** — built bottom-up: small shared primitives first (`Button`,
-   `TriageBadge`, `PulseDivider`), then page-level composites (`Navbar`, `Footer`, `AppShell`,
-   `StatCard`, `AppointmentCard`), then the three routed pages.
-4. **Interactivity** — client-side routing (`react-router-dom`), local component state for
-   search filtering and tabbed content, and CSS-only motion (animated SVG heartbeat trace,
-   hover/focus states) with `prefers-reduced-motion` respected throughout.
-5. **Usability testing** — manually exercised each user flow with a headless browser
-   (Playwright) at both a 1440px desktop viewport and a 390px mobile viewport: landing page →
-   "Go to my dashboard" → appointment card → tabbed detail view → back to dashboard. Verified
-   keyboard focus rings, tab-panel switching, search filtering, and the mobile nav drawer.
-6. **Review & fixes** — caught and corrected two issues during screenshot review: the sidebar
-   was marking all nav links "active" simultaneously (fixed by exact-matching only the
-   Dashboard route) and a stray margin was leaving a gap above the footer (removed).
+- **`src/api/client.js`** — a small `fetch()` wrapper for every backend endpoint, handling the
+  JSON envelope, auth headers, and error messages.
+- **`src/context/AuthContext.jsx`** — holds the logged-in user, backed by a JWT in
+  `localStorage`; exposes `login`, `register`, `logout`.
+- **`src/components/ProtectedRoute.jsx`** — redirects to `/login` if there's no authenticated
+  user, preserving the originally requested page.
+- **`src/pages/Login.jsx`** and **`src/pages/Register.jsx`** (new) — real authentication forms,
+  with role-conditional fields (patient vs. doctor) matching the backend's registration schema.
+- **`src/pages/BookAppointment.jsx`** (new) — select a doctor, see their real published
+  availability, pick a slot, and book — calling the same conflict-checked endpoint documented
+  in the Week 3 API reference.
+- **`src/pages/SymptomChecker.jsx`** (new) — submits real symptoms to the rule-based triage
+  engine and displays the actual urgency classification and reasons it returns.
+- **`Dashboard.jsx`** and **`AppointmentDetail.jsx`** — rewritten to fetch real appointments,
+  doctors, symptom logs, prescriptions, and records, with loading and empty states.
+- **`AppShell.jsx`** — now shows the real logged-in user and includes a working Log out action.
 
-## 2. Design System & Rationale
+## 2. Environment Configuration
 
-Rather than a generic dashboard template, the interface is built around one idea: **a calm,
-clinical-teal system that reuses the same red/amber/green triage vocabulary everywhere urgency
-needs to be legible at a glance** — the badge on a dashboard card, the sidebar-flagged stat, and
-the section in the appointment detail view all use the identical `TriageBadge` component and
-color tokens.
+The app reads the backend's URL from a single environment variable:
 
-- **Color** — cool paper background (`#F5F8FA`), deep slate-navy ink (`#14293B`), a single
-  clinical-teal accent (`#1F6F6B`) for interactive elements, and the existing triage palette
-  (emergency `#B0332E`, urgent `#C98A2C`, routine `#3E8A5C`) carried over from the Week 1
-  architecture report for consistency across deliverables.
-- **Type** — three roles, not two: **Fraunces** (a characterful serif) for headlines and page
-  titles, **Inter** for body copy and UI labels, and **IBM Plex Mono** for data-flavored text
-  (timestamps, stat labels, badges) — a nod to clinical readouts.
-- **Signature element** — a hand-drawn EKG "pulse line" (`PulseDivider` component) used sparingly
-  as a section divider and, animated, as the centerpiece of the hero's "live vitals" card. It
-  appears in exactly two places so it stays a signature rather than a decoration.
-- **Layout** — the marketing landing page uses an asymmetric hero split (copy left, product
-  mockup right); the authenticated views (dashboard, detail) use a fixed dark sidebar + light
-  content shell, a distinct visual register that signals "you're now inside the product."
+```
+VITE_API_BASE_URL=https://your-backend.onrender.com
+```
 
-## 3. Architecture & Design Patterns
+- **Local development:** create a `.env` file (see `.env.example`) pointing at your local
+  backend (typically `http://localhost:4000`).
+- **Netlify:** set `VITE_API_BASE_URL` under Site configuration → Environment variables, then
+  trigger a new deploy (environment variable changes do not apply to already-built output).
 
-- **Component-based architecture**: every UI element is a small, single-purpose component
-  (`Button`, `TriageBadge`, `StatCard`, `AppointmentCard`, `PulseDivider`) composed into pages.
-- **Container/presentational split**: page components (`Dashboard.jsx`, `AppointmentDetail.jsx`)
-  own state and data-fetching concerns; shared components are stateless and receive data via props.
-- **Shared layout shell pattern**: `AppShell.jsx` implements the sidebar/topbar chrome once and
-  is reused by both authenticated views, so navigation, the user badge, and the mobile menu
-  toggle live in a single place.
-- **Data-access seam**: all mock content lives in `src/data/mockData.js` behind two lookup
-  functions (`getAppointmentById`, `getDoctorById`). Replacing these with real `fetch` calls to
-  the endpoints in the Week 1 report (e.g. `GET /api/v1/patients/{id}/records`) does not require
-  touching any component.
-- **Accessibility as a structural concern, not an afterthought**: semantic landmarks (`<header>`,
-  `<main>`, `<aside>`, `<nav>`), a skip-to-content link on every page, visible focus rings defined
-  globally, proper `role="tablist"`/`role="tabpanel"` wiring with `aria-selected` on the detail
-  page's tabs, a labelled data table with `<caption>` and `scope="col"` headers, and
-  `prefers-reduced-motion` handling.
+The backend must have `CORS_ORIGIN` set to this app's exact deployed URL (no trailing slash),
+or every request will be blocked by the browser's CORS check.
 
-## 4. Libraries Used
+## 3. Authentication Flow
 
-| Library | Purpose |
-|---|---|
-| `react` / `react-dom` | UI rendering |
-| `react-router-dom` | Client-side routing between the three views |
-| `vite` + `@vitejs/plugin-react` | Dev server and production bundling |
+- Registering or logging in stores a JWT in `localStorage` under `medisync_token`.
+- On every page load, `AuthContext` checks for a stored token and calls `GET /api/v1/auth/me`
+  to resolve the current user before rendering any protected route.
+- `ProtectedRoute` wraps `/dashboard`, `/appointments/:id`, `/book-appointment`, and
+  `/symptom-checker` — visiting any of them while logged out redirects to `/login` and returns
+  the user to their original destination after signing in.
+- Logging out clears the token and returns to a logged-out state immediately (no reload needed).
 
-No CSS framework was used — all styling is hand-written CSS with custom properties (design
-tokens), to keep the visual language fully intentional rather than templated.
+## 4. Verified End-to-End (Local Testing)
 
-## 5. Views & Navigation
+Before this was packaged, the full flow was tested against a running copy of the Week 3
+backend using an automated browser:
 
-| Route | View | Purpose |
-|---|---|---|
-| `/` | Landing Page | Marketing/entry point; explains the product and routes into the app |
-| `/dashboard` | Patient Dashboard | Stat overview, searchable upcoming appointments, recent symptom logs |
-| `/appointments/:id` | Appointment Detail | Tabbed view (Overview / Notes / Prescriptions / Documents) for a single appointment |
-| `*` | Not Found | Friendly 404 with a way back home |
+1. Register a new patient → redirected straight into the dashboard as a real, logged-in user.
+2. Submit a symptom check ("chest pain, shortness of breath") → correctly classified
+   **Emergency** by the live rule engine, with the actual reason returned by the API.
+3. Register a doctor, publish a real availability slot via the API.
+4. As the patient, book that exact slot through the Book Appointment page → appointment created
+   via the real conflict-checked endpoint.
+5. Open the resulting appointment detail page → real doctor name, specialization, license,
+   date/time, and reason all rendered from the API response.
+6. Cancel the appointment → status flips to "Cancelled" and the Join Call button disables,
+   confirming the cancel endpoint and UI state are wired correctly.
 
-Navigation is fully interconnected: the landing page's CTAs and the hero's "View appointment"
-link route into the dashboard and a specific appointment; dashboard appointment cards and
-symptom-log rows route into the matching detail page; the detail page's breadcrumb and sidebar
-link back to the dashboard and homepage.
+Every request in this flow returned the expected 200/201 status from the backend.
 
-## 6. Running the Application Locally
+## 5. Running the Application Locally
 
-**Requirements:** Node.js 18+ and npm.
+**Requirements:** Node.js 18+, npm, and a running copy of the MediSync backend (Week 3).
 
 ```bash
-# 1. Unzip and enter the project
+# 1. Install dependencies
 cd medisync-frontend
-
-# 2. Install dependencies
 npm install
+
+# 2. Point the app at your backend
+cp .env.example .env
+# edit .env: VITE_API_BASE_URL=http://localhost:4000
 
 # 3. Start the dev server
 npm run dev
 ```
 
-Then open the URL Vite prints (typically `http://localhost:5173`).
+Open the URL Vite prints (typically `http://localhost:5173`). Make sure the backend's
+`CORS_ORIGIN` matches this URL.
 
-To produce an optimized production build:
-
+To build for production:
 ```bash
 npm run build      # outputs to dist/
-npm run preview    # serves the production build locally for a final check
+npm run preview    # serve the production build locally for a final check
 ```
 
-## 7. Project Structure
+## 6. Project Structure
 
 ```
-yuvaintern/
-└── public/
-     ├── _redirects
+medisync-frontend/
 ├── index.html
 ├── package.json
 ├── vite.config.js
+├── .env.example
 └── src/
-    ├── main.jsx                 # React root + router
-    ├── App.jsx                  # Route definitions
-    ├── data/
-    │   └── mockData.js          # Stand-in for backend API responses
+    ├── main.jsx                    React root + router + AuthProvider
+    ├── App.jsx                     Route definitions (public + protected)
+    ├── api/
+    │   └── client.js               Fetch wrapper for every backend endpoint
+    ├── context/
+    │   └── AuthContext.jsx         Logged-in user state, login/register/logout
+    ├── utils/
+    │   └── format.js                getInitials, formatDate, formatTime
     ├── styles/
-    │   └── tokens.css           # Design tokens + global/base styles
-    ├── components/              # Shared, reusable UI pieces
+    │   └── tokens.css              Design tokens + global/base + shared form styles
+    ├── components/
+    │   ├── ProtectedRoute.jsx      Auth guard for private routes
     │   ├── Button.jsx / .css
     │   ├── TriageBadge.jsx
     │   ├── PulseDivider.jsx
     │   ├── Navbar.jsx / .css
     │   ├── Footer.jsx / .css
-    │   ├── AppShell.jsx / .css
+    │   ├── AppShell.jsx / .css     Now shows the real user + logout
     │   ├── StatCard.jsx / .css
     │   └── AppointmentCard.jsx / .css
-    └── pages/                   # Routed views
+    └── pages/
         ├── LandingPage.jsx / .css
-        ├── Dashboard.jsx / .css
-        ├── AppointmentDetail.jsx / .css
+        ├── Login.jsx / Register.jsx / Auth.css   (new)
+        ├── Dashboard.jsx / .css                   (now backend-driven)
+        ├── BookAppointment.jsx / .css              (new)
+        ├── SymptomChecker.jsx / .css                (new)
+        ├── AppointmentDetail.jsx / .css            (now backend-driven)
         └── NotFound.jsx
 ```
 
-## 8. Testing Notes
+## 7. Known Simplifications
 
-Manual usability passes were run at 1440×900 (desktop) and 390×844 (mobile) viewports using an
-automated headless browser, covering:
-
-- Full navigation loop across all three views and back
-- Search-as-you-type filtering on the dashboard appointment list
-- Tab switching on the appointment detail page (Overview, Notes, Prescriptions, Documents)
-- Empty states (no search results, no prescriptions, no documents)
-- Mobile sidebar open/close via the hamburger toggle
-- Keyboard-only navigation (visible focus outlines on every interactive element)
-
-- Data is static (`mockData.js`); no network requests are made yet. The data-access functions
-  are isolated so they can be swapped for real API calls without touching components.
-- No automated test suite (e.g. Vitest/React Testing Library) is included yet — recommended as
-  a next step before backend integration.
-- Authentication, the symptom-intake form itself, and the live WebRTC video call UI are out of
-  scope for this front-end pass and are planned for a subsequent week's task.
+- Appointment "mode" is always displayed as "Video Consultation" — the backend doesn't yet
+  track consultation mode as a separate field.
+- The Consultation Notes tab shows a placeholder message, since the backend does not yet
+  expose a GET endpoint for consultation notes (documented as a Week 3 known limitation).
+- Prescriptions/Documents tabs show all of the patient's prescriptions/records rather than
+  ones strictly scoped to that single appointment, since the backend's response shape does not
+  yet link a prescription back to its originating appointment ID.
+- "Join video call" is a UI affordance only — no WebRTC signaling is wired up yet, consistent
+  with the Week 1 architecture's phased plan.
