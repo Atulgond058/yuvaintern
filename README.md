@@ -5,6 +5,7 @@ and **Vite** — now fully connected to the real MediSync back-end API (Week 3) 
 data. Authentication, appointments, symptom triage, prescriptions, and records are all live.
 
 ---
+## LIVE LINK:   https://medisynchealth.netlify.app/
 
 ## 1. What Changed From the Mock-Data Version
 
